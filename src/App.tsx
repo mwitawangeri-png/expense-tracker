@@ -1,49 +1,36 @@
-import { useState } from "react";
-import { ExpenseList } from "./ExpenseList";
+import { useState } from 'react';
+import { ExpenseList } from './ExpenseList';
+import { ExpenseForm } from './ExpenseForm';
 
 interface Expense {
   id: string;
   description: string;
   amount: number;
 }
+
 function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  
- const handleAddExpense = () => {
-  const newExpense: Expense = {
-    id: crypto.randomUUID(),
-    description: description,
-    amount: parseFloat(amount)
+
+  // This is the "endpoint" we provide to the child component
+  const handleAddExpense = (description: string, amount: number) => {
+    const newExpense: Expense = {
+      id: crypto.randomUUID(),
+      description,
+      amount
+    };
+    
+    setExpenses([...expenses, newExpense]);
   };
 
-  setExpenses([...expenses, newExpense]);
-
-  setDescription('');
-  setAmount('');
-  
- };
   return (
     <div>
       <h1>Expense Tracker</h1>
-      <ExpenseList expenses={expenses} />
-
-      <div>
-        <input
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)} 
-        />
-        <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        />
-        <button onClick={handleAddExpense}>Add</button>
-      </div>
       
+      {/* We pass the function down as a prop */}
+      <ExpenseForm onAddExpense={handleAddExpense} />
+      
+      {/* We pass the data down as a prop */}
+      <ExpenseList expenses={expenses} />
     </div>
   );
 }
