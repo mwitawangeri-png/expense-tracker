@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExpenseList } from "./ExpenseList";
 
 interface Expense {
   id: string;
@@ -26,7 +27,7 @@ function App() {
   return (
     <div>
       <h1>Expense Tracker</h1>
-      <p>Total expenses: {expenses.length}</p>
+      <ExpenseList expenses={expenses} />
 
       <div>
         <input
