@@ -17,7 +17,8 @@ function App() {
     const fetchExpenses = async () => {
       const { data, error } = await supabase
         .from('expenses')
-        .select('*');
+        .select('*')
+        .order('created_at', {ascending: true});
       
       if (error) {
         console.error('Error fetching expenses:', error);
@@ -45,6 +46,20 @@ function App() {
     }
   };
 
+  const handleDeleteExpense = async (id: string) => {
+    const {error} = await supabase
+    .from('expenses')
+    .delete()
+    .eq('id', id);
+
+    if(error){
+      console.error('Error deleting expense:', error);
+    }
+    else{
+      setExpenses(expenses.filter((expense) => expense.id !==id))
+    }
+  };
+
   return (
     <div>
       <h1>Expense Tracker</h1>
@@ -54,7 +69,7 @@ function App() {
       <ExpenseForm onAddExpense={handleAddExpense} />
       
       {/* We pass the data down as a prop */}
-      <ExpenseList expenses={expenses} />
+      <ExpenseList expenses={expenses} onDelete={handleDeleteExpense} />
     </div>
   );
 }
