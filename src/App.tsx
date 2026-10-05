@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExpenseList } from './ExpenseList';
 import { ExpenseForm } from './ExpenseForm';
+import { supabase } from './supabase';
 
 interface Expense {
   id: string;
@@ -12,15 +13,36 @@ function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  // This is the "endpoint" we provide to the child component
-  const handleAddExpense = (description: string, amount: number) => {
-    const newExpense: Expense = {
-      id: crypto.randomUUID(),
-      description,
-      amount
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching expenses:', error);
+      } else if (data) {
+        setExpenses(data);
+      }
     };
-    
-    setExpenses([...expenses, newExpense]);
+
+    fetchExpenses();
+  }, []);
+
+  // This is the "endpoint" we provide to the child component
+  const handleAddExpense = async (description: string, amount: number) => {
+
+    const {data, error} = await supabase
+    .from('expenses')
+    .insert([{description, amount}])
+    .select();
+
+    if(error){
+      console.error('Error saving expense:', error);
+    }
+    else if(data){
+      setExpenses([...expenses, data[0]]);
+    }
   };
 
   return (
