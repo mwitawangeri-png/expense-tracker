@@ -45,12 +45,14 @@ function App() {
           .select('*')
           .order('created_at', {ascending: true});
 
-          if(data) setExpenses(data);
+          if(data) {console.log('new data added'); setExpenses(data)};
         };
-        fetchUpdatedData
+        fetchUpdatedData();
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log('Subscription status:', status);
+    });
 
     return () => {
       supabase.removeChannel(channel);
