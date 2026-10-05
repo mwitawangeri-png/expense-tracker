@@ -30,6 +30,33 @@ function App() {
     fetchExpenses();
   }, []);
 
+  useEffect(() => {
+    const channel = supabase
+    .channel('custom-all-channel')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table:'expenses'},
+      (payload) => {
+        console.log('Realtime event received!', payload);
+
+        const fetchUpdatedData = async () => {
+          const {data} = await supabase
+          .from('expenses')
+          .select('*')
+          .order('created_at', {ascending: true});
+
+          if(data) setExpenses(data);
+        };
+        fetchUpdatedData
+      }
+    )
+    .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+      
+  },[]);
   // This is the "endpoint" we provide to the child component
   const handleAddExpense = async (description: string, amount: number) => {
 
@@ -60,6 +87,28 @@ function App() {
     }
   };
 
+  const handleUpdateExpense = async (id: string, description: string, amount: number) => {
+    const {data, error} = await supabase
+    .from('expenses')
+    .update({ description, amount})
+    .eq('id', id)
+    .select();
+
+    if(error) {
+      console.error('Error updating expenses:', error);
+    } else if (data && data.length > 0) {
+      // 2. Update local state using .map() to replace only the updated item
+      setExpenses(
+        expenses.map((expense) => 
+          expense.id === id ? data[0] : expense
+        )
+      );
+    } else {
+      // 2. Catch the silent RLS failure gracefully
+      console.error('Update failed: No data returned. Check RLS policies.');
+    }
+
+  };
   return (
     <div>
       <h1>Expense Tracker</h1>
@@ -69,7 +118,7 @@ function App() {
       <ExpenseForm onAddExpense={handleAddExpense} />
       
       {/* We pass the data down as a prop */}
-      <ExpenseList expenses={expenses} onDelete={handleDeleteExpense} />
+      <ExpenseList expenses={expenses} onDelete={handleDeleteExpense} onUpdate={handleUpdateExpense} />
     </div>
   );
 }
