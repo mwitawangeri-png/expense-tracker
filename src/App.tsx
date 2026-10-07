@@ -1,9 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { Dashboard } from './Dashboard';
-import { Login } from './login';
+import { Login } from './Login';
 import { useAuth } from './AuthContext';
 import { supabase } from './supabase';
-import { ProtectedRoute } from './protectedRoute';
+import { ProtectedRoute } from './ProtectedRoute';
 
 // A simple dummy component for our settings page
 function Settings() {
